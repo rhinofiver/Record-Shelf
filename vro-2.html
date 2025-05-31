@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinyl Record Organizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f9fafb;
+            color: #333;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2.8rem;
+            text-align: center;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            color: #1e88e5;
+        }
+
+        h1::before {
+            content: "🎵";
+            font-size: 2.8rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 14px 20px;
+            border: 1.8px solid #ccc;
+            border-radius: 30px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-box:focus {
+            border-color: #1e88e5;
+            box-shadow: 0 0 8px rgba(30, 136, 229, 0.3);
+            outline: none;
+        }
+
+        .db-search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .db-search-btn:hover {
+            background: #1565c0;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .filter-select {
+            padding: 14px 18px;
+            border: 1.8px solid #ccc;
+            border-radius: 30px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-select:focus {
+            border-color: #1e88e5;
+            outline: none;
+        }
+
+        .add-btn {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .add-btn:hover {
+            background: #1565c0;
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: #1e88e5;
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px;
+            text-align: center;
+            flex: 1;
+            min-width: 160px;
+            box-shadow: 0 10px 25px rgba(30, 136, 229, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .records-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .record-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .record-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .record-card-with-image {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .album-artwork {
+            width: 90px;
+            height: 90px;
+            border-radius: 15px;
+            object-fit: cover;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(30, 136, 229, 0.2);
+        }
+
+        .record-info-section {
+            flex: 1;
+        }
+
+        .record-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 6px;
+        }
+
+        .record-artist {
+            color: #1e88e5;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .record-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .record-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .edit-btn {
+            background: #ffd54f;
+            color: #3e2723;
+        }
+
+        .edit-btn:hover {
+            background: #ffca28;
+            transform: translateY(-2px);
+        }
+
+        .delete-btn {
+            background: #ef5350;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #e53935;
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 1100;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 35px 40px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .modal-content h2 {
+            color: #1e88e5;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #222;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1.8px solid #ccc;
+            border-radius: 15px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e88e5;
+            box-shadow: 0 0 8px rgba(30, 136, 229, 0.3);
+        }
+
+        .auto-fill-btn {
+            background: #00b894;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+
+        .auto-fill-btn:hover {
+            background: #009973;
+            transform: translateY(-2px);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 18px;
+            margin-top: 30px;
+        }
+
+        .save-btn {
+            background: #00b894;
+            color: white;
+            flex: 1;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 30px;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .save-btn:hover {
+            background: #009973;
+        }
+
+        .cancel-btn {
+            background: #ddd;
+            color: #333;
+            flex: 1;
+            border-radius: 30px;
+            padding: 14px 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .cancel-btn:hover {
+            background: #ccc;
+        }
+
+        .db-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #1e88e5;
+            border-top: none;
+            border-radius: 0 0 15px 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .db-result-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .db-result-item:hover {
+            background: #f0f7ff;
+        }
+
+        .db-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .db-result-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .db-result-info {
+            flex: 1;
+        }
+
+        .db-result-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .db-result-artist {
+            color: #1e88e5;
+            font-size: 0.9em;
+            margin-bottom: 2px;
+        }
+
+        .db-result-year {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 20px;
+            border: 2px dashed #ddd;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        /* Vinyl Record Animation */
+        .vinyl-container {
+            margin: 20px auto 40px;
+            width: 180px;
+            height: 180px;
+            position: relative;
+            display: none;
+        }
+
+        .vinyl-record {
+            width: 180px;
+            height: 180px;
+            background: #222;
+            border-radius: 50%;
+            position: relative;
+            animation: spin 10s linear infinite;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .vinyl-record::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #1e88e5, #0d47a1);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .vinyl-record::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .vinyl-grooves {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .vinyl-grooves::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.05),
+                        0 0 0 10px rgba(255, 255, 255, 0.03),
+                        0 0 0 15px rgba(255, 255, 255, 0.02),
+                        0 0 0 20px rgba(255, 255, 255, 0.01);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .search-container {
+                min-width: 100%;
+            }
+            
+            .records-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .record-details {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            h1::before {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vinyl Record Organizer</h1>
+        
+        <div class="vinyl-container" id="vinylAnimation">
+            <div class="vinyl-record">
+                <div class="vinyl-grooves"></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" class="search-box" id="searchBox" placeholder="Search by title, artist, or genre...">
+                <button class="db-search-btn" id="dbSearchBtn" title="Search music database">🎵 DB</button>
+                <div class="db-results" id="dbResults" style="display: none;"></div>
+                <div class="loading-spinner" id="loadingSpinner">🎵 Searching database...</div>
+            </div>
+            <select class="filter-select" id="genreFilter">
+                <option value="">All Genres</option>
+            </select>
+            <select class="filter-select" id="sortSelect">
+                <option value="title">Sort by Title</option>
+                <option value="artist">Sort by Artist</option>
+                <option value="year">Sort by Year</option>
+                <option value="genre">Sort by Genre</option>
+            </select>
+            <button class="add-btn" id="addRecordBtn">+ Add Record</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <span class="stat-number" id="totalRecords">0</span>
+                <span>Total Records</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="totalGenres">0</span>
+                <span>Genres</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="totalArtists">0</span>
+                <span>Artists</span>
+            </div>
+        </div>
+
+        <div class="records-grid" id="recordsGrid">
+            <div class="empty-state">
+                <h3>No records yet!</h3>
+                <p>Click "Add Record" to start building your collection.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Record Modal -->
+    <div class="modal" id="recordModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Add New Record</h2>
+            <form id="recordForm">
+                <div class="form-group">
+                    <label for="title">Album Title *</label>
+                    <div style="display: flex; align-items: center;">
+                        <input type="text" id="title" required>
+                        <button type="button" class="auto-fill-btn" id="autoFillBtn">Auto-Fill</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="artist">Artist *</label>
+                    <input type="text" id="artist" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="genre">Genre</label>
+                    <input type="text" id="genre" placeholder="Rock, Jazz, Hip-Hop, etc.">
+                </div>
+                
+                <div class="form-group">
+                    <label for="year">Release Year</label>
+                    <input type="number" id="year" min="1900" max="2025">
+                </div>
+                
+                <div class="form-group">
+                    <label for="condition">Condition</label>
+                    <select id="condition">
+                        <option value="Mint">Mint (M)</option>
+                        <option value="Near Mint">Near Mint (NM)</option>
+                        <option value="Very Good Plus">Very Good Plus (VG+)</option>
+                        <option value="Very Good">Very Good (VG)</option>
+                        <option value="Good Plus">Good Plus (G+)</option>
+                        <option value="Good">Good (G)</option>
+                        <option value="Fair">Fair (F)</option>
+                        <option value="Poor">Poor (P)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="artwork">Album Artwork URL</label>
+                    <input type="url" id="artwork" placeholder="Will auto-fill from database search">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tracklist">Track Listing</label>
+                    <textarea id="tracklist" rows="4" placeholder="Will auto-fill from database search"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Special edition, signed copy, purchase info, etc."></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="btn save-btn">Save Record</button>
+                    <button type="button" class="btn cancel-btn" id="cancelBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        class VinylOrganizer {
+            constructor() {
+                this.records = JSON.parse(localStorage.getItem('vinylRecords') || '[]');
+                this.currentEditId = null;
+                this.dbSearchTimeout = null;
+                this.initializeElements();
+                this.bindEvents();
+                this.loadRecords();
+                this.updateStats();
+                this.populateGenreFilter();
+                this.showVinylAnimation();
+            }
+
+            initializeElements() {
+                this.searchBox = document.getElementById('searchBox');
+                this.genreFilter = document.getElementById('genreFilter');
+                this.sortSelect = document.getElementById('sortSelect');
+                this.addRecordBtn = document.getElementById('addRecordBtn');
+                this.recordsGrid = document.getElementById('recordsGrid');
+                this.modal = document.getElementById('recordModal');
+                this.form = document.getElementById('recordForm');
+                this.cancelBtn = document.getElementById('cancelBtn');
+                this.modalTitle = document.getElementById('modalTitle');
+                this.dbSearchBtn = document.getElementById('dbSearchBtn');
+                this.dbResults = document.getElementById('dbResults');
+                this.loadingSpinner = document.getElementById('loadingSpinner');
+                this.autoFillBtn = document.getElementById('autoFillBtn');
+                this.vinylAnimation = document.getElementById('vinylAnimation');
+            }
+
+            showVinylAnimation() {
+                // Show vinyl animation when collection is empty
+                if (this.records.length === 0) {
+                    this.vinylAnimation.style.display = 'block';
+                } else {
+                    this.vinylAnimation.style.display = 'none';
+                }
+            }
+
+            async searchMusicDatabase(query) {
+                try {
+                    this.loadingSpinner.style.display = 'block';
+                    this.dbResults.style.display = 'none';
+                    
+                    // Using iTunes Search API as it's free and doesn't require API keys
+                    const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=10`);
+                    const data = await response.json();
+                    
+                    this.loadingSpinner.style.display = 'none';
+                    
+                    if (data.results && data.results.length > 0) {
+                        this.displaySearchResults(data.results);
+                    } else {
+                        this.dbResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #666;">No results found. Try a different search term.</div>';
+                        this.dbResults.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Database search error:', error);
+                    this.loadingSpinner.style.display = 'none';
+                    this.dbResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #ff7675;">Search failed. Please try again.</div>';
+                    this.dbResults.style.display = 'block';
+                }
+            }
+
+            displaySearchResults(results) {
+                const html = results.map(result => `
+                    <div class="db-result-item" onclick="organizer.selectAlbumFromDB(${JSON.stringify(result).replace(/"/g, '&quot;')})">
+                        <img src="${result.artworkUrl60 || result.artworkUrl100}" alt="Album artwork" class="db-result-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjZGRkIi8+Cjx0ZXh0IHg9IjI1IiB5PSIyOCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7imKs8L3RleHQ+Cjwvc3ZnPg=='">
+                        <div class="db-result-info">
+                            <div class="db-result-title">${result.collectionName}</div>
+                            <div class="db-result-artist">${result.artistName}</div>
+                            <div class="db-result-year">${new Date(result.releaseDate).getFullYear()} • ${result.primaryGenreName}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                this.dbResults.innerHTML = html;
+                this.dbResults.style.display = 'block';
+            }
+
+            async selectAlbumFromDB(albumData) {
+                this.dbResults.style.display = 'none';
+                
+                // Fill form with database information
+                document.getElementById('title').value = albumData.collectionName;
+                document.getElementById('artist').value = albumData.artistName;
+                document.getElementById('genre').value = albumData.primaryGenreName;
+                document.getElementById('year').value = new Date(albumData.releaseDate).getFullYear();
+                
+                // Get high-res artwork
+                const artworkUrl = albumData.artworkUrl100?.replace('100x100', '500x500') || albumData.artworkUrl60?.replace('60x60', '500x500');
+                if (artworkUrl) {
+                    document.getElementById('artwork').value = artworkUrl;
+                }
+                
+                // Try to get track listing from iTunes lookup
+                try {
+                    const lookupResponse = await fetch(`https://itunes.apple.com/lookup?id=${albumData.collectionId}&entity=song`);
+                    const lookupData = await lookupResponse.json();
+                    
+                    if (lookupData.results && lookupData.results.length > 1) {
+                        const tracks = lookupData.results.slice(1) // Remove album info, keep only tracks
+                            .sort((a, b) => (a.trackNumber || 0) - (b.trackNumber || 0))
+                            .map(track => `${track.trackNumber || ''}. ${track.trackName}`)
+                            .join('\n');
+                        
+                        document.getElementById('tracklist').value = tracks;
+                    }
+                } catch (error) {
+                    console.error('Error fetching tracklist:', error);
+                }
+            }
+
+            bindEvents() {
+                this.searchBox.addEventListener('input', () => this.filterRecords());
+                this.genreFilter.addEventListener('change', () => this.filterRecords());
+                this.sortSelect.addEventListener('change', () => this.sortRecords());
+                this.addRecordBtn.addEventListener('click', () => this.openModal());
+                this.form.addEventListener('submit', (e) => this.saveRecord(e));
+                this.cancelBtn.addEventListener('click', () => this.closeModal());
+                
+                // Database search functionality
+                this.dbSearchBtn.addEventListener('click', () => {
+                    const query = this.searchBox.value.trim();
+                    if (query) {
+                        this.searchMusicDatabase(query);
+                    }
+                });
+                
+                // Auto-fill functionality in modal
+                this.autoFillBtn.addEventListener('click', () => {
+                    const title = document.getElementById('title').value.trim();
+                    const artist = document.getElementById('artist').value.trim();
+                    const query = title ? (artist ? `${artist} ${title}` : title) : artist;
+                    
+                    if (query) {
+                        this.searchAndFillModal(query);
+                    } else {
+                        alert('Please enter at least an album title or artist name first.');
+                    }
+                });
+                
+                // Hide DB results when clicking elsewhere
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-container')) {
+                        this.dbResults.style.display = 'none';
+                    }
+                });
+                
+                // Close modal when clicking outside
+                this.modal.addEventListener('click', (e) => {
+                    if (e.target === this.modal) this.closeModal();
+                });
+            }
+
+            async searchAndFillModal(query) {
+                try {
+                    this.autoFillBtn.textContent = 'Searching...';
+                    this.autoFillBtn.disabled = true;
+                    
+                    const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=1`);
+                    const data = await response.json();
+                    
+                    if (data.results && data.results.length > 0) {
+                        const result = data.results[0];
+                        await this.selectAlbumFromDB(result);
+                    } else {
+                        alert('No matching album found in database. Try adjusting the title or artist.');
+                    }
+                } catch (error) {
+                    console.error('Auto-fill error:', error);
+                    alert('Database search failed. Please try again.');
+                } finally {
+                    this.autoFillBtn.textContent = 'Auto-Fill';
+                    this.autoFillBtn.disabled = false;
+                }
+            }
+
+            openModal(record = null) {
+                this.currentEditId = record ? record.id : null;
+                this.modalTitle.textContent = record ? 'Edit Record' : 'Add New Record';
+                
+                if (record) {
+                    document.getElementById('title').value = record.title;
+                    document.getElementById('artist').value = record.artist;
+                    document.getElementById('genre').value = record.genre || '';
+                    document.getElementById('year').value = record.year || '';
+                    document.getElementById('condition').value = record.condition || 'Near Mint';
+                    document.getElementById('artwork').value = record.artwork || '';
+                    document.getElementById('tracklist').value = record.tracklist || '';
+                    document.getElementById('notes').value = record.notes || '';
+                } else {
+                    this.form.reset();
+                    document.getElementById('condition').value = 'Near Mint';
+                }
+                
+                this.modal.style.display = 'block';
+                document.getElementById('title').focus();
+            }
+
+            closeModal() {
+                this.modal.style.display = 'none';
+                this.currentEditId = null;
+                this.form.reset();
+            }
+
+            saveRecord(e) {
+                e.preventDefault();
+                
+                const record = {
+                    id: this.currentEditId || Date.now(),
+                    title: document.getElementById('title').value.trim(),
+                    artist: document.getElementById('artist').value.trim(),
+                    genre: document.getElementById('genre').value.trim(),
+                    year: document.getElementById('year').value,
+                    condition: document.getElementById('condition').value,
+                    artwork: document.getElementById('artwork').value.trim(),
+                    tracklist: document.getElementById('tracklist').value.trim(),
+                    notes: document.getElementById('notes').value.trim(),
+                    dateAdded: this.currentEditId ? 
+                        this.records.find(r => r.id === this.currentEditId).dateAdded : 
+                        new Date().toLocaleDateString()
+                };
+
+                if (this.currentEditId) {
+                    const index = this.records.findIndex(r => r.id === this.currentEditId);
+                    this.records[index] = record;
+                } else {
+                    this.records.push(record);
+                }
+
+                this.saveToStorage();
+                this.loadRecords();
+                this.updateStats();
+                this.populateGenreFilter();
+                this.showVinylAnimation();
+                this.closeModal();
+            }
+
+            deleteRecord(id) {
+                if (confirm('Are you sure you want to delete this record?')) {
+                    this.records = this.records.filter(r => r.id !== id);
+                    this.saveToStorage();
+                    this.loadRecords();
+                    this.updateStats();
+                    this.populateGenreFilter();
+                    this.showVinylAnimation();
+                }
+            }
+
+            saveToStorage() {
+                localStorage.setItem('vinylRecords', JSON.stringify(this.records));
+            }
+
+            loadRecords() {
+                const filteredRecords = this.getFilteredRecords();
+                this.renderRecords(filteredRecords);
+            }
+
+            getFilteredRecords() {
+                let filtered = [...this.records];
+                
+                const searchTerm = this.searchBox.value.toLowerCase().trim();
+                if (searchTerm) {
+                    filtered = filtered.filter(record => 
+                        record.title.toLowerCase().includes(searchTerm) ||
+                        record.artist.toLowerCase().includes(searchTerm) ||
+                        (record.genre && record.genre.toLowerCase().includes(searchTerm))
+                    );
+                }
+                
+                const genreFilter = this.genreFilter.value;
+                if (genreFilter) {
+                    filtered = filtered.filter(record => record.genre === genreFilter);
+                }
+                
+                return filtered;
+            }
+
+            sortRecords() {
+                this.loadRecords();
+            }
+
+            renderRecords(records) {
+                const sortBy = this.sortSelect.value;
+                records.sort((a, b) => {
+                    const aVal = (a[sortBy] || '').toString().toLowerCase();
+                    const bVal = (b[sortBy] || '').toString().toLowerCase();
+                    
+                    if (sortBy === 'year') {
+                        return (parseInt(b[sortBy]) || 0) - (parseInt(a[sortBy]) || 0);
+                    }
+                    
+                    return aVal.localeCompare(bVal);
+                });
+
+                if (records.length === 0) {
+                    this.recordsGrid.innerHTML = `
+                        <div class="empty-state">
+                            <h3>${this.records.length === 0 ? 'No records yet!' : 'No matching records found'}</h3>
+                            <p>${this.records.length === 0 ? 'Click "Add Record" to start building your collection.' : 'Try adjusting your search or filters.'}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.recordsGrid.innerHTML = records.map(record => `
+                    <div class="record-card">
+                        ${record.artwork ? `
+                            <div class="record-card-with-image">
+                                <img src="${record.artwork}" alt="${record.title} artwork" class="album-artwork" onerror="this.style.display='none'">
+                                <div class="record-info-section">
+                        ` : ''}
+                        <div class="record-title">${record.title}</div>
+                        <div class="record-artist">by ${record.artist}</div>
+                        <div class="record-details">
+                            <div><strong>Genre:</strong> ${record.genre || 'Not specified'}</div>
+                            <div><strong>Year:</strong> ${record.year || 'Unknown'}</div>
+                            <div><strong>Condition:</strong> ${record.condition}</div>
+                        </div>
+                        ${record.tracklist ? `<details style="margin-top: 10px;"><summary style="cursor: pointer; color: #1e88e5; font-weight: bold;">Track Listing</summary><pre style="margin-top: 5px; font-size: 0.8em; color: #666; white-space: pre-wrap;">${record.tracklist}</pre></details>` : ''}
+                        ${record.notes ? `<div style="margin-top: 10px; font-style: italic; color: #666;">"${record.notes}"</div>` : ''}
+                        <div style="margin-top: 10px; font-size: 0.8em; color: #999;">Added: ${record.dateAdded}</div>
+                        <div class="record-actions">
+                            <button class="btn edit-btn" onclick="organizer.openModal(${JSON.stringify(record).replace(/"/g, '&quot;')})">Edit</button>
+                            <button class="btn delete-btn" onclick="organizer.deleteRecord(${record.id})">Delete</button>
+                        </div>
+                        ${record.artwork ? `
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }
+
+            filterRecords() {
+                this.loadRecords();
+            }
+
+            updateStats() {
+                const totalRecords = this.records.length;
+                const totalGenres = new Set(this.records.map(r => r.genre).filter(g => g)).size;
+                const totalArtists = new Set(this.records.map(r => r.artist)).size;
+
+                document.getElementById('totalRecords').textContent = totalRecords;
+                document.getElementById('totalGenres').textContent = totalGenres;
+                document.getElementById('totalArtists').textContent = totalArtists;
+            }
+
+            populateGenreFilter() {
+                const genres = [...new Set(this.records.map(r => r.genre).filter(g => g))].sort();
+                const currentValue = this.genreFilter.value;
+                
+                this.genreFilter.innerHTML = '<option value="">All Genres</option>' +
+                    genres.map(genre => `<option value="${genre}">${genre}</option>`).join('');
+                
+                this.genreFilter.value = currentValue;
+            }
+        }
+
+        // Initialize the organizer
+        const organizer = new VinylOrganizer();
+    </script>
+</body>
+</html>
